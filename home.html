@@ -14,7 +14,7 @@
         
         body {
             background-color: #101F37;
-            color: #1c1c1e;
+            color: #ffffff;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -73,19 +73,90 @@
             padding: 10px;
         }
         
+        /* Стили для задач */
         .task-item {
+            display: flex;
+            align-items: center;
             background-color: #131932;
             border-radius: 10px;
             padding: 15px;
-            color: #fff;
             margin-bottom: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        /* Стили для чекбоксов */
+        .task-checkbox {
+            display: block;
+            position: relative;
+            margin-right: 15px;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            height: 24px;
+            width: 24px;
+        }
+        
+        .task-checkbox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 24px;
+            width: 24px;
+            background-color: #382d73;
+            border: 2px solid #7881F6;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .task-checkbox:hover input ~ .checkmark {
+            background-color: #63b9c9;
+        }
+        
+        .task-checkbox input:checked ~ .checkmark {
+            background-color: #7881F6;
+        }
+        
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        
+        .task-checkbox input:checked ~ .checkmark:after {
+            display: block;
+        }
+        
+        .task-checkbox .checkmark:after {
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 12px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+        
+        .task-content {
+            flex: 1;
         }
         
         .task-title {
             font-size: 17px;
             font-weight: 500;
             margin-bottom: 5px;
+            color: #ffffff;
         }
         
         .task-meta {
@@ -103,8 +174,21 @@
             color: #007aff;
         }
         
+        /* Стили для задачи с подзадачами */
+        .task-with-subtasks {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .task-main-content {
+            display: flex;
+            width: 100%;
+            align-items: center;
+        }
+        
         .task-progress {
             height: 4px;
+            width: 100%;
             background-color: #000000;
             border-radius: 2px;
             margin-top: 10px;
@@ -114,46 +198,54 @@
         .progress-bar {
             height: 100%;
             background-color: #7E21FF;
-            width: 30%;
+            transition: width 0.3s ease;
         }
         
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 60%;
-            color: #8e8e93;
-        }
-        
-        .empty-state p {
-            margin-top: 10px;
-            font-size: 16px;
-        }
-        
-        /* Bottom Navigation */
-        .bottom-nav {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px;
-            background-color: #ffffff;
-            border-top: 1px solid #e5e5ea;
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .nav-icon {
+        .add-subtask-btn {
+            background: none;
+            border: none;
             font-size: 24px;
-            margin-bottom: 5px;
+            color: #7881F6;
+            cursor: pointer;
+            padding: 0 10px;
+            margin-left: auto;
         }
         
-        .add-button {
+        /* Подзадачи */
+        .subtasks-container {
+            max-height: 0;
+            width: 100%;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-top: 0;
+        }
+        
+        .task-item.expanded .subtasks-container {
+            max-height: 500px;
+            margin-top: 15px;
+        }
+        
+        .subtask {
+            display: flex;
+            padding: 10px 0 10px 39px;
+            position: relative;
+        }
+        
+        .subtask-checkbox {
             position: absolute;
-            bottom: 80px;
+            left: 0;
+            top: 10px;
+        }
+        
+        .subtask-text {
+            font-size: 15px;
+            color: #ffffff;
+        }
+        
+        /* Add Button */
+        .add-button {
+            position: fixed;
+            bottom: 20px;
             right: 20px;
             width: 60px;
             height: 60px;
@@ -165,6 +257,7 @@
             color: white;
             font-size: 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 10;
         }
         
         /* Modal for new task */
@@ -187,6 +280,7 @@
             max-width: 400px;
             border-radius: 14px;
             padding: 20px;
+            border: 1px solid #7881F6;
         }
         
         .modal-title {
@@ -194,6 +288,7 @@
             font-weight: 600;
             margin-bottom: 20px;
             text-align: center;
+            color: #ffffff;
         }
         
         .form-group {
@@ -213,6 +308,8 @@
             border: 3px solid #17183a;
             border-radius: 8px;
             font-size: 16px;
+            background-color: #131932;
+            color: #ffffff;
         }
         
         .priority-group {
@@ -220,13 +317,17 @@
             justify-content: space-between;
             margin-bottom: 20px;
             background-color: #131932;
+            padding: 10px;
+            border-radius: 8px;
         }
         
         .priority-btn {
             padding: 10px 15px;
             border-radius: 8px;
             border: 1px solid #e5e5ea;
-            background-color: white;
+            background-color: #131932;
+            color: #ffffff;
+            cursor: pointer;
         }
         
         .priority-btn.high {
@@ -252,6 +353,10 @@
         .date-time-group input {
             width: 48%;
             padding: 10px;
+            background-color: #131932;
+            border: 3px solid #17183a;
+            color: #ffffff;
+            border-radius: 8px;
         }
         
         .modal-actions {
@@ -265,11 +370,13 @@
             border-radius: 8px;
             font-size: 16px;
             font-weight: 500;
+            cursor: pointer;
         }
         
         .cancel-btn {
-            background-color: white;
-            border: 1px solid #e5e5ea;
+            background-color: #131932;
+            border: 1px solid #7881F6;
+            color: #ffffff;
         }
         
         .save-btn {
@@ -277,104 +384,6 @@
             color: white;
             border: none;
         }
-        
-        /* Spaces menu */
-        .spaces-menu {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 80%;
-            max-width: 300px;
-            height: 100%;
-            background-color: white;
-            z-index: 101;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            padding: 20px;
-        }
-        
-        .space-item {
-            padding: 15px 0;
-            border-bottom: 1px solid #e5e5ea;
-        }
-
-
-        .task-checkbox {
-    display: block;
-    position: relative;
-    padding-left: 35px;
-    margin-right: 15px;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-.task-checkbox input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-}
-
-.checkmark {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 24px;
-    width: 24px;
-    background-color: #382d73;
-    border: 2px solid #7881F6;
-    border-radius: 6px;
-    transition: all 0.3s;
-}
-
-.task-checkbox:hover input ~ .checkmark {
-    background-color: #63b9c9;
-}
-
-.task-checkbox input:checked ~ .checkmark {
-    background-color: #7881F6;
-}
-
-.checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
-}
-
-.task-checkbox input:checked ~ .checkmark:after {
-    display: block;
-}
-
-.task-checkbox .checkmark:after {
-    left: 7px;
-    top: 3px;
-    width: 6px;
-    height: 12px;
-    border: solid white;
-    border-width: 0 3px 3px 0;
-    -webkit-transform: rotate(45deg);
-    -ms-transform: rotate(45deg);
-    transform: rotate(45deg);
-}
-
-/* Обновлённые стили для контейнера задачи */
-.task-item {
-    display: flex;
-    align-items: flex-start;
-    background-color: #131932;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.task-content {
-    flex: 1;
-}
     </style>
 </head>
 <body>
@@ -395,53 +404,81 @@
     
     <!-- Tasks List -->
     <div class="tasks-container">
-        <!-- Empty State -->
-        <!-- <div class="empty-state">
-            <p>No tasks</p>
-        </div> -->
-        
-        <!-- Tasks -->
+        <!-- Обычная задача с чекбоксом -->
         <div class="task-item">
-    <label class="task-checkbox">
-        <input type="checkbox">
-        <span class="checkmark"></span>
-    </label>
-    <div class="task-content">
-        <div class="task-title">Complete project</div>
-        <div class="task-meta">
-            <span class="task-time">Today, 20:00</span>
-            <span class="task-category">#Work</span>
-        </div>
-    </div>
-    </div>
-
-    
-        
-        <div class="task-item">
-            <div class="task-title">Prepare for meeting</div>
-            <div class="task-meta">
-                <span class="task-time">Today, 22:54</span>
-                <span class="task-category">#Work</span>
-            </div>
-            <div class="task-progress">
-                <div class="progress-bar" style="width: 30%"></div>
+            <label class="task-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <div class="task-content">
+                <div class="task-title">Complete project</div>
+                <div class="task-meta">
+                    <span class="task-time">Today, 20:00</span>
+                    <span class="task-category">#Work</span>
+                </div>
             </div>
         </div>
         
+        <!-- Задача с подзадачами -->
+        <div class="task-item task-with-subtasks expandable">
+            <div class="task-main-content">
+                <label class="task-checkbox">
+                    <input type="checkbox">
+                    <span class="checkmark"></span>
+                </label>
+                <div class="task-content">
+                    <div class="task-title">Prepare for meeting</div>
+                    <div class="task-meta">
+                        <span class="task-time">Today, 22:54</span>
+                        <span class="task-category">#Work</span>
+                    </div>
+                    <div class="task-progress">
+                        <div class="progress-bar" style="width: 30%"></div>
+                    </div>
+                </div>
+                <button class="add-subtask-btn">+</button>
+            </div>
+            
+            <div class="subtasks-container">
+                <div class="subtask">
+                    <label class="task-checkbox subtask-checkbox">
+                        <input type="checkbox" class="subtask-input">
+                        <span class="checkmark"></span>
+                    </label>
+                    <span class="subtask-text">Create presentation slides</span>
+                </div>
+                <div class="subtask">
+                    <label class="task-checkbox subtask-checkbox">
+                        <input type="checkbox" class="subtask-input" checked>
+                        <span class="checkmark"></span>
+                    </label>
+                    <span class="subtask-text">Invite team members</span>
+                </div>
+                <div class="subtask">
+                    <label class="task-checkbox subtask-checkbox">
+                        <input type="checkbox" class="subtask-input">
+                        <span class="checkmark"></span>
+                    </label>
+                    <span class="subtask-text">Prepare agenda</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Еще одна обычная задача с чекбоксом -->
         <div class="task-item">
-    <label class="task-checkbox">
-        <input type="checkbox">
-        <span class="checkmark"></span>
-    </label>
-    <div class="task-content">
-        <div class="task-title">Send emails for group</div>
-        <div class="task-meta">
-            <span class="task-time">Today, 18:35</span>
-            <span class="task-category">#Work</span>
+            <label class="task-checkbox">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+            </label>
+            <div class="task-content">
+                <div class="task-title">Send emails for group</div>
+                <div class="task-meta">
+                    <span class="task-time">Today, 18:35</span>
+                    <span class="task-category">#Work</span>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-    
     
     <!-- Add Button -->
     <div class="add-button" id="addButton">+</div>
@@ -493,14 +530,6 @@
         </div>
     </div>
     
-    <!-- Spaces Menu -->
-    <div class="spaces-menu" id="spacesMenu">
-        <div class="space-item">All</div>
-        <div class="space-item">Stud</div>
-        <div class="space-item">Work</div>
-        <div class="space-item">Project</div>
-    </div>
-    
     <script>
         // Открытие модального окна
         document.getElementById('addButton').addEventListener('click', function() {
@@ -512,18 +541,6 @@
             document.getElementById('taskModal').style.display = 'none';
         });
         
-        // Открытие меню пространств
-        document.querySelector('.nav-icon').addEventListener('click', function() {
-            document.getElementById('spacesMenu').style.display = 'block';
-        });
-        
-        // Закрытие меню при клике вне его
-        window.addEventListener('click', function(event) {
-            if (!event.target.closest('.spaces-menu') && !event.target.closest('.nav-icon')) {
-                document.getElementById('spacesMenu').style.display = 'none';
-            }
-        });
-        
         // Навигация по датам
         const dateArrows = document.querySelectorAll('.date-arrow');
         dateArrows.forEach(arrow => {
@@ -532,6 +549,59 @@
                 console.log('Date changed');
             });
         });
+        
+        // Обработчик клика по задаче с подзадачами
+        document.querySelectorAll('.task-item.expandable').forEach(task => {
+            const mainContent = task.querySelector('.task-main-content');
+            const subtasksContainer = task.querySelector('.subtasks-container');
+            const addBtn = task.querySelector('.add-subtask-btn');
+            
+            // Переключение раскрытия/закрытия
+            mainContent.addEventListener('click', (e) => {
+                if (e.target !== addBtn && !e.target.classList.contains('task-checkbox')) {
+                    task.classList.toggle('expanded');
+                    updateProgressBar(task);
+                }
+            });
+            
+            // Добавление новой подзадачи
+            addBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const newSubtask = document.createElement('div');
+                newSubtask.className = 'subtask';
+                newSubtask.innerHTML = `
+                    <label class="task-checkbox subtask-checkbox">
+                        <input type="checkbox" class="subtask-input">
+                        <span class="checkmark"></span>
+                    </label>
+                    <span class="subtask-text">New subtask</span>
+                `;
+                subtasksContainer.appendChild(newSubtask);
+                
+                // Добавляем обработчик для новой подзадачи
+                newSubtask.querySelector('.subtask-input').addEventListener('change', () => {
+                    updateProgressBar(task);
+                });
+            });
+            
+            // Обработчики для существующих подзадач
+            task.querySelectorAll('.subtask-input').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    updateProgressBar(task);
+                });
+            });
+        });
+        
+        // Обновление прогресс-бара
+        function updateProgressBar(task) {
+            const subtasks = task.querySelectorAll('.subtask-input');
+            if (subtasks.length === 0) return;
+            
+            const completed = task.querySelectorAll('.subtask-input:checked').length;
+            const progress = (completed / subtasks.length) * 100;
+            
+            task.querySelector('.progress-bar').style.width = `${progress}%`;
+        }
     </script>
 </body>
 </html>
