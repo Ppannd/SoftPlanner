@@ -297,6 +297,84 @@
             padding: 15px 0;
             border-bottom: 1px solid #e5e5ea;
         }
+
+
+        .task-checkbox {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-right: 15px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.task-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 24px;
+    width: 24px;
+    background-color: #fff;
+    border: 2px solid #7881F6;
+    border-radius: 6px;
+    transition: all 0.3s;
+}
+
+.task-checkbox:hover input ~ .checkmark {
+    background-color: #f0f2ff;
+}
+
+.task-checkbox input:checked ~ .checkmark {
+    background-color: #7881F6;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.task-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.task-checkbox .checkmark:after {
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+/* Обновлённые стили для контейнера задачи */
+.task-item {
+    display: flex;
+    align-items: flex-start;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.task-content {
+    flex: 1;
+}
     </style>
 </head>
 <body>
