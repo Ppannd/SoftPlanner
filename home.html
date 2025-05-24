@@ -18,20 +18,90 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: margin-left 0.3s;
         }
         
         /* Header */
         .header {
-            padding: 25px;
+            padding: 15px 20px;
             text-align: left;
             background-color: #131932;
             border-bottom: 1px solid #7881F6;
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 20;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #7881F6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 15px;
         }
         
         .header h1 {
             font-size: 20px;
             font-weight: 600;
             color: #007aff;
+        }
+        
+        /* Sidebar Menu */
+        .sidebar-menu {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background-color: #131932;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: left 0.3s;
+            z-index: 15;
+            padding-top: 70px;
+            border-right: 1px solid #7881F6;
+        }
+        
+        .sidebar-menu.active {
+            left: 0;
+        }
+        
+        .menu-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            color: #ffffff;
+            border-bottom: 1px solid #1A1C44;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-item:hover {
+            background-color: #1A1C44;
+        }
+        
+        .menu-item:first-child {
+            font-weight: 600;
+            color: #7881F6;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 10;
+        }
+        
+        .overlay.active {
+            display: block;
         }
         
         /* Date Navigation */
@@ -73,7 +143,7 @@
             padding: 10px;
         }
         
-        /* Стили для задач */
+        /* Task Items */
         .task-item {
             display: flex;
             align-items: center;
@@ -84,7 +154,6 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
-        /* Стили для чекбоксов */
         .task-checkbox {
             display: block;
             position: relative;
@@ -174,7 +243,7 @@
             color: #007aff;
         }
         
-        /* Стили для задачи с подзадачами */
+        /* Task with subtasks */
         .task-with-subtasks {
             flex-direction: column;
             align-items: flex-start;
@@ -211,7 +280,7 @@
             margin-left: auto;
         }
         
-        /* Подзадачи */
+        /* Subtasks */
         .subtasks-container {
             max-height: 0;
             width: 100%;
@@ -387,10 +456,21 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- Header with Avatar -->
     <div class="header">
+        <div class="user-avatar" id="avatar">U</div>
         <h1>Soft Planner</h1>
     </div>
+    
+    <!-- Sidebar Menu -->
+    <div class="sidebar-menu" id="sidebarMenu">
+        <div class="menu-item">Profile</div>
+        <div class="menu-item">Setting</div>
+        <div class="menu-item">Create a space</div>
+        <div class="menu-item">Notification</div>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
     
     <!-- Date Navigation -->
     <div class="date-navigation">
@@ -404,7 +484,7 @@
     
     <!-- Tasks List -->
     <div class="tasks-container">
-        <!-- Обычная задача с чекбоксом -->
+        <!-- Regular task with checkbox -->
         <div class="task-item">
             <label class="task-checkbox">
                 <input type="checkbox">
@@ -419,13 +499,9 @@
             </div>
         </div>
         
-        <!-- Задача с подзадачами -->
+        <!-- Task with subtasks -->
         <div class="task-item task-with-subtasks expandable">
             <div class="task-main-content">
-                <label class="task-checkbox">
-                    <input type="checkbox">
-                    <span class="checkmark"></span>
-                </label>
                 <div class="task-content">
                     <div class="task-title">Prepare for meeting</div>
                     <div class="task-meta">
@@ -464,7 +540,7 @@
             </div>
         </div>
         
-        <!-- Еще одна обычная задача с чекбоксом -->
+        <!-- Another regular task with checkbox -->
         <div class="task-item">
             <label class="task-checkbox">
                 <input type="checkbox">
@@ -531,32 +607,45 @@
     </div>
     
     <script>
-        // Открытие модального окна
+        // Sidebar Menu Toggle
+        const avatar = document.getElementById('avatar');
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        const overlay = document.getElementById('overlay');
+        
+        avatar.addEventListener('click', function(e) {
+            e.stopPropagation();
+            sidebarMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        
+        overlay.addEventListener('click', function() {
+            sidebarMenu.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+        
+        // Task Modal
         document.getElementById('addButton').addEventListener('click', function() {
             document.getElementById('taskModal').style.display = 'flex';
         });
         
-        // Закрытие модального окна
         document.getElementById('cancelBtn').addEventListener('click', function() {
             document.getElementById('taskModal').style.display = 'none';
         });
         
-        // Навигация по датам
+        // Date Navigation
         const dateArrows = document.querySelectorAll('.date-arrow');
         dateArrows.forEach(arrow => {
             arrow.addEventListener('click', function() {
-                // Здесь будет логика изменения даты
                 console.log('Date changed');
             });
         });
         
-        // Обработчик клика по задаче с подзадачами
+        // Task with subtasks functionality
         document.querySelectorAll('.task-item.expandable').forEach(task => {
             const mainContent = task.querySelector('.task-main-content');
             const subtasksContainer = task.querySelector('.subtasks-container');
             const addBtn = task.querySelector('.add-subtask-btn');
             
-            // Переключение раскрытия/закрытия
             mainContent.addEventListener('click', (e) => {
                 if (e.target !== addBtn && !e.target.classList.contains('task-checkbox')) {
                     task.classList.toggle('expanded');
@@ -564,7 +653,6 @@
                 }
             });
             
-            // Добавление новой подзадачи
             addBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const newSubtask = document.createElement('div');
@@ -578,13 +666,11 @@
                 `;
                 subtasksContainer.appendChild(newSubtask);
                 
-                // Добавляем обработчик для новой подзадачи
                 newSubtask.querySelector('.subtask-input').addEventListener('change', () => {
                     updateProgressBar(task);
                 });
             });
             
-            // Обработчики для существующих подзадач
             task.querySelectorAll('.subtask-input').forEach(checkbox => {
                 checkbox.addEventListener('change', () => {
                     updateProgressBar(task);
@@ -592,7 +678,6 @@
             });
         });
         
-        // Обновление прогресс-бара
         function updateProgressBar(task) {
             const subtasks = task.querySelectorAll('.subtask-input');
             if (subtasks.length === 0) return;
