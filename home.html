@@ -77,7 +77,7 @@
             background-color: #131932;
             border-radius: 10px;
             padding: 15px;
-            color: white;
+            color: #fff;
             margin-bottom: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
@@ -325,14 +325,14 @@
     left: 0;
     height: 24px;
     width: 24px;
-    background-color: #fff;
+    background-color: #382d73;
     border: 2px solid #7881F6;
     border-radius: 6px;
     transition: all 0.3s;
 }
 
 .task-checkbox:hover input ~ .checkmark {
-    background-color: #f0f2ff;
+    background-color: #63b9c9;
 }
 
 .task-checkbox input:checked ~ .checkmark {
@@ -365,7 +365,7 @@
 .task-item {
     display: flex;
     align-items: flex-start;
-    background-color: #ffffff;
+    background-color: #131932;
     border-radius: 10px;
     padding: 15px;
     margin-bottom: 10px;
@@ -414,6 +414,8 @@
         </div>
     </div>
     </div>
+
+    
         
         <div class="task-item">
             <div class="task-title">Prepare for meeting</div>
@@ -427,13 +429,18 @@
         </div>
         
         <div class="task-item">
-            <div class="task-title">Send emails for group</div>
-            <div class="task-meta">
-                <span class="task-time">Today, 18:35</span>
-                <span class="task-category">#Work</span>
-            </div>
+    <label class="task-checkbox">
+        <input type="checkbox">
+        <span class="checkmark"></span>
+    </label>
+    <div class="task-content">
+        <div class="task-title">Send emails for group</div>
+        <div class="task-meta">
+            <span class="task-time">Today, 18:35</span>
+            <span class="task-category">#Work</span>
         </div>
     </div>
+</div>
     
     
     <!-- Add Button -->
