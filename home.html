@@ -113,11 +113,20 @@
             background-color: #0B1627;
             border-bottom: 1px solid #7881F6;
         }
-        
-        .date-arrow {
-            font-size: 20px;
-            color: #ffffff;
-            padding: 0 15px;
+        .date-current, .date-adjacent {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .date-adjacent {
+            font-size: 18px;
+            color: #888;
+   
         }
         
         .date-current {
@@ -134,6 +143,9 @@
         .date-current .month-year {
             font-size: 14px;
             color: #ffffff;
+        }
+        .month-year {
+            font-size: 0.8em;
         }
         
         /* Tasks List */
@@ -152,6 +164,7 @@
             padding: 15px;
             margin-bottom: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 2.5px solid #233E68;
         }
         
         .task-checkbox {
@@ -458,7 +471,7 @@
 <body>
     <!-- Header with Avatar -->
     <div class="header">
-        <div class="user-avatar" id="avatar">U</div>
+        <div class="user-avatar" id="avatar">S</div>
         <h1>Soft Planner</h1>
     </div>
     
@@ -471,16 +484,29 @@
     </div>
     
     <div class="overlay" id="overlay"></div>
+
+
     
-    <!-- Date Navigation -->
-    <div class="date-navigation">
-        <div class="date-arrow">‹</div>
-        <div class="date-current">
-            <div class="day">21</div>
-            <div class="month-year">05.2025</div>
-        </div>
-        <div class="date-arrow">›</div>
+    
+   <div class="date-navigation">
+    <!-- Предыдущая дата (меньше и темнее) -->
+    <div class="date-adjacent date-prev" onclick="navigateDate(-1)">
+        <div class="day">20</div>
+        <div class="month-year">05.2025</div>
     </div>
+    
+    <!-- Текущая дата -->
+    <div class="date-current">
+        <div class="day">21</div>
+        <div class="month-year">05.2025</div>
+    </div>
+    
+    <!-- Следующая дата (меньше и темнее) -->
+    <div class="date-adjacent date-next" onclick="navigateDate(1)">
+        <div class="day">22</div>
+        <div class="month-year">05.2025</div>
+    </div>
+</div>
     
     <!-- Tasks List -->
     <div class="tasks-container">
