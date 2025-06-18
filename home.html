@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soft Planner</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
         * {
     margin: 0;
@@ -551,28 +552,68 @@ body {
     color: #ff3b30;
 }
 
-/* Add Button */
-.add-button {
+/* Floating Buttons */
+.floating-buttons {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 60px;
-    height: 60px;
-    background-color: #007aff;
-    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 10;
+}
+
+.floating-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 30px;
+    font-size: 24px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    z-index: 10;
     cursor: pointer;
     transition: transform 0.2s;
 }
 
-.add-button:hover {
+.floating-button:hover {
     transform: scale(1.1);
+}
+
+.add-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    background-color: #007aff;
+    transition: transform 0.2s; 
+}
+
+.add-button:hover {
+    transform: scale(1.1); 
+}
+
+
+.person-button {
+    background-color: #7881F6;
+}
+
+.computer-button {
+    background-color: #7881F6;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
 }
 
 /* Modal for new task */
@@ -764,13 +805,8 @@ body {
     <div class="user-avatar" id="avatar">S</div>
     <h1>Soft Planner</h1>
     
-    <!-- Добавляем кнопку приглашения и поиск -->
+    <!-- Добавляем поиск -->
     <div class="header-actions">
-        <button class="invite-btn" title="Пригласить человека">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 8V4M14 8V4M10 12H18M10 16H18M6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20Z" stroke="#7881F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
         <div class="search-container">
             <input type="text" class="search-input" placeholder="Поиск по тегам...">
             <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -828,8 +864,16 @@ body {
         <!-- Tasks will be loaded here from JavaScript -->
     </div>
     
-    <!-- Add Button -->
-    <div class="add-button" id="addButton">+</div>
+    <!-- Floating Buttons -->
+    <div class="floating-buttons">
+        <div class="floating-button person-button">
+            <span class="material-symbols-outlined">person_add</span>
+        </div>
+        <div class="add-button" id="addButton">+</div>
+        <div class="floating-button computer-button">
+            <span class="material-symbols-outlined">computer</span>
+        </div>
+    </div>
     
     <!-- New Task Modal -->
     <div class="modal" id="taskModal">
@@ -927,7 +971,7 @@ body {
     </div>
     
     <script>
-let currentDate = new Date();
+        let currentDate = new Date();
 let currentEditingTask = null;
 let selectedPriority = 'medium';
 
@@ -1460,6 +1504,7 @@ function updateTaskCompletion(taskElement, completed) {
 function formatDateKey(date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
+
     </script>
 </body>
 </html>
