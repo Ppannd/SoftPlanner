@@ -2,7 +2,7 @@
   "name": "soft-planner",
   "version": "1.0.0",
   "dependencies": {
-    "pg": "8.11.3",  // PostgreSQL
-    "mysql2": "3.6.5" // MySQL
+    "pg": "8.11.3",  
+    "mysql2": "3.6.5" 
   }
 }
