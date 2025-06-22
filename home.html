@@ -1230,55 +1230,44 @@
     </div>
     
     <script>
-        const API_BASE = '/api';
-        let currentUser = null;
-
-        // Инициализация
         document.addEventListener('DOMContentLoaded', async () => {
-            await checkAuth();
-            loadTasks();
-        });
-
-        // Проверка авторизации
-        async function checkAuth() {
+            // Проверка авторизации
             const token = localStorage.getItem('token');
             if (!token) {
                 window.location.href = 'Login.html';
                 return;
             }
-            
+
+            // Загрузка задач
             try {
-                const response = await fetch(`${API_BASE}/profile`, {
+                const response = await fetch('/api/tasks', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                currentUser = await response.json();
-                document.querySelector('.user-avatar').textContent = currentUser.name[0];
-            } catch (error) {
-                localStorage.removeItem('token');
-                window.location.href = 'Login.html';
-            }
-        }
 
-        // Загрузка задач
-        async function loadTasks() {
-            try {
-                const response = await fetch(`${API_BASE}/tasks`, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                });
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки задач');
+                }
+
                 const tasks = await response.json();
                 renderTasks(tasks);
+
             } catch (error) {
-                console.error('Ошибка загрузки задач:', error);
+                console.error('Ошибка:', error);
+                alert('Не удалось загрузить задачи');
             }
-        }
+        });
 
         function renderTasks(tasks) {
             const container = document.getElementById('tasksContainer');
-            container.innerHTML = tasks.map(task => `
-                <div class="task-item priority-${task.priority}">
-                    <!-- Ваш существующий HTML для задачи -->
-                </div>
-            `).join('');
+            container.innerHTML = tasks.length 
+                ? tasks.map(task => `
+                    <div class="task-item">
+                        <h3>${task.title}</h3>
+                        <p>${task.description || ''}</p>
+                        <small>${new Date(task.dueDate).toLocaleDateString()}</small>
+                    </div>
+                `).join('')
+                : '<p class="empty-state">Нет задач</p>';
         }
     </script>
 </body>
