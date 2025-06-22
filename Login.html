@@ -280,31 +280,36 @@
     </div>
 
     <script>
-        // Создание анимированных пузырьков
-        function createBubbles() {
-            const bubblesContainer = document.getElementById('bubbles');
-            const bubbleCount = 12;
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
             
-            for (let i = 0; i < bubbleCount; i++) {
-                const bubble = document.createElement('div');
-                bubble.classList.add('bubble');
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
                 
-                const size = Math.random() * 80 + 40; // 40-120px
-                const posX = Math.random() * 100;
-                const duration = Math.random() * 25 + 15; // 15-40 секунд
-                const delay = Math.random() * 15;
-                
-                bubble.style.width = `${size}px`;
-                bubble.style.height = `${size}px`;
-                bubble.style.left = `${posX}%`;
-                bubble.style.animationDuration = `${duration}s`;
-                bubble.style.animationDelay = `${delay}s`;
-                
-                bubblesContainer.appendChild(bubble);
+                if (response.ok) {
+                    const { token, userId, name } = await response.json();
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('userId', userId);
+                    localStorage.setItem('userName', name);
+                    window.location.href = 'home.html';
+                } else {
+                    alert('Ошибка входа');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка соединения');
             }
         }
-        
-        window.addEventListener('load', createBubbles);
+
+        document.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleLogin();
+        });
     </script>
 </body>
 </html>
