@@ -1230,45 +1230,89 @@
     </div>
     
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Проверка авторизации
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'Login.html';
-                return;
-            }
+        // Внутри тега <script> в home.html:
 
-            // Загрузка задач
-            try {
-                const response = await fetch('/api/tasks', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+document.addEventListener('DOMContentLoaded', async () => {
+  // Проверка авторизации
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = 'Login.html';
+    return;
+  }
 
-                if (!response.ok) {
-                    throw new Error('Ошибка загрузки задач');
-                }
+  try {
+    // Проверка валидности токена
+    const authResponse = await fetch('/api/check-auth', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const authData = await authResponse.json();
 
-                const tasks = await response.json();
-                renderTasks(tasks);
+    if (!authData.success) {
+      throw new Error(authData.error || 'Invalid session');
+    }
 
-            } catch (error) {
-                console.error('Ошибка:', error);
-                alert('Не удалось загрузить задачи');
-            }
-        });
+    // Установка данных пользователя
+    document.getElementById('avatar').textContent = authData.avatar;
+    document.getElementById('userName').textContent = authData.name;
 
-        function renderTasks(tasks) {
-            const container = document.getElementById('tasksContainer');
-            container.innerHTML = tasks.length 
-                ? tasks.map(task => `
-                    <div class="task-item">
-                        <h3>${task.title}</h3>
-                        <p>${task.description || ''}</p>
-                        <small>${new Date(task.dueDate).toLocaleDateString()}</small>
-                    </div>
-                `).join('')
-                : '<p class="empty-state">Нет задач</p>';
-        }
+    // Загрузка задач
+    await loadTasks();
+
+  } catch (error) {
+    console.error('Auth check failed:', error);
+    localStorage.clear();
+    window.location.href = 'Login.html';
+  }
+});
+
+async function loadTasks() {
+  try {
+    const response = await fetch('/api/tasks', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to load tasks');
+    }
+
+    renderTasks(data.tasks);
+  } catch (error) {
+    console.error('Error loading tasks:', error);
+    showError('Failed to load tasks');
+  }
+}
+
+function renderTasks(tasks) {
+  const container = document.getElementById('tasksContainer');
+  container.innerHTML = '';
+
+  if (tasks.length === 0) {
+    container.innerHTML = '<p class="empty-state">No tasks yet</p>';
+    return;
+  }
+
+  tasks.forEach(task => {
+    const taskElement = document.createElement('div');
+    taskElement.className = `task-item priority-${task.priority}`;
+    taskElement.innerHTML = `
+      <div class="task-main-content">
+        <label class="task-checkbox">
+          <input type="checkbox" ${task.completed ? 'checked' : ''}>
+          <span class="checkmark"></span>
+        </label>
+        <div class="task-content">
+          <div class="task-title">${task.title}</div>
+          <div class="task-meta">
+            <span class="task-time">${new Date(task.dueDate).toLocaleString()}</span>
+            <span class="task-category">${task.priority}</span>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(taskElement);
+  });
+}
     </script>
 </body>
 </html>
