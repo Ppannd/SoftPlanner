@@ -6,7 +6,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-app.use(cors());
+
+// Настройка CORS для работы с фронтендом
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'https://soft-planner-mija.vercel.app',
+  credentials: true
+}));
 app.use(express.json());
 
 // Подключение к MongoDB
@@ -39,8 +44,19 @@ app.post('/api/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
     
+    // Валидация
+    if (!name || !email || !password) {
+      return res.status(400).json({ 
+        error: 'All fields are required',
+        fields: { name: !name, email: !email, password: !password }
+      });
+    }
+
     if (await User.findOne({ email })) {
-      return res.status(400).json({ error: 'Email already exists' });
+      return res.status(400).json({ 
+        error: 'Email already exists',
+        field: 'email'
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -59,14 +75,18 @@ app.post('/api/register', async (req, res) => {
     const token = jwt.sign({ userId }, process.env.JWT_SECRET || 'secret123', { expiresIn: '24h' });
 
     res.status(201).json({
+      success: true,
       token,
       userId,
-      name,
-      message: 'Registration successful'
+      name
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Registration error:', error);
+    res.status(500).json({ 
+      error: 'Registration failed',
+      details: error.message 
+    });
   }
 });
 
@@ -74,43 +94,112 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    // Валидация
+    if (!email || !password) {
+      return res.status(400).json({ 
+        error: 'Email and password are required',
+        fields: { email: !email, password: !password }
+      });
+    }
+
     const user = await User.findOne({ email });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ 
+        error: 'Invalid credentials',
+        field: 'email'
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ 
+        error: 'Invalid credentials',
+        field: 'password'
+      });
     }
 
     const token = jwt.sign({ userId: user.userId }, process.env.JWT_SECRET || 'secret123', { expiresIn: '24h' });
 
     res.json({
+      success: true,
       token,
       userId: user.userId,
       name: user.name
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({ 
+      error: 'Login failed',
+      details: error.message 
+    });
   }
 });
 
-// Получение задач
-app.get('/api/tasks', async (req, res) => {
+// Middleware для проверки авторизации
+const authMiddleware = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
 
-    const { userId } = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
-    const user = await User.findOne({ userId });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    console.error('Auth error:', error);
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
 
-    if (!user) return res.status(404).json({ error: 'User not found' });
+// Получение задач (только для авторизованных)
+app.get('/api/tasks', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findOne({ userId: req.userId });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-    res.json(user.tasks);
+    res.json({
+      success: true,
+      tasks: user.tasks
+    });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Tasks error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get tasks',
+      details: error.message 
+    });
   }
 });
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Server running on port ${process.env.PORT || 5000}`);
+// Проверка авторизации
+app.get('/api/check-auth', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findOne({ userId: req.userId });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      userId: user.userId,
+      name: user.name
+    });
+  } catch (error) {
+    console.error('Check auth error:', error);
+    res.status(500).json({ 
+      error: 'Auth check failed',
+      details: error.message 
+    });
+  }
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
