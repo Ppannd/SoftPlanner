@@ -278,33 +278,31 @@
         <h2 class="form-title">Create your account</h2>
         <div class="divider"></div>
         
-        <form>
+        <form id="registerForm">
             <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" placeholder="Any">
+                <input type="text" id="name" placeholder="Any" required>
             </div>
             
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" placeholder="your@email.ru">
+                <input type="email" id="email" placeholder="your@email.ru" required>
             </div>
             
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" placeholder="*********">
-                <p class="password-hint">min 8 sim</p>
+                <input type="password" id="password" placeholder="*********" minlength="8" required>
+                <p class="password-hint">min 8 characters</p>
             </div>
             
             <div class="form-group">
                 <label for="password-again">Confirm Password</label>
-                <input type="password" id="password-again" placeholder="*********">
+                <input type="password" id="password-again" placeholder="*********" minlength="8" required>
             </div>
 
-
-            <a href="home.html" class="submit-btn-link"><span class="btn-text">CONTINUE</span></a>
-
-
-        <!--<button type="submit" class="submit-btn">CONTINUE</button>-->
+            <button type="submit" class="submit-btn-link">
+                <span class="btn-text">CONTINUE</span>
+            </button>
         </form>
         
         <div class="login-link">
@@ -313,7 +311,49 @@
     </div>
 
     <script>
- 
+        // Обработка регистрации
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('password-again').value;
+            
+            // Валидация
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    window.location.href = 'Login.html';
+                } else {
+                    alert(data.error || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Registration failed. Please try again.');
+            }
+        });
+
+        // Создание анимированных пузырьков
         function createBubbles() {
             const bubblesContainer = document.getElementById('bubbles');
             const bubbleCount = 12;
@@ -322,9 +362,9 @@
                 const bubble = document.createElement('div');
                 bubble.classList.add('bubble');
                 
-                const size = Math.random() * 50 + 40; // 40-120px
+                const size = Math.random() * 50 + 40;
                 const posX = Math.random() * 100;
-                const duration = Math.random() * 10 + 15; // 15-40 секунд
+                const duration = Math.random() * 10 + 15;
                 const delay = Math.random() * 15;
                 
                 bubble.style.width = `${size}px`;
