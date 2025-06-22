@@ -1231,6 +1231,20 @@
     
     <script>
         // Внутри тега <script> в home.html:
+document.addEventListener('DOMContentLoaded', () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = 'Login.html';
+    return;
+  }
+
+  // Установка данных пользователя
+  const avatar = localStorage.getItem('userAvatar');
+  const name = localStorage.getItem('userName');
+  
+  if (avatar) document.getElementById('avatar').textContent = avatar;
+  if (name) document.getElementById('userName').textContent = name;
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Проверка авторизации
