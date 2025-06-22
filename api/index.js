@@ -1,92 +1,97 @@
 require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-
-// Настройка CORS для работы с фронтендом
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://soft-planner-mija.vercel.app',
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
-// Подключение к MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/soft-planner')
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// Путь к файлу БД (в /tmp для Vercel)
+const DB_PATH = path.join('/tmp', 'softplanner.db');
+const db = new sqlite3.Database(DB_PATH);
 
-// Модель пользователя
-const UserSchema = new mongoose.Schema({
-  userId: { type: String, unique: true },
-  name: String,
-  email: { type: String, unique: true },
-  password: String,
-  tasks: [{
-    title: String,
-    description: String,
-    dueDate: Date,
-    priority: String,
-    completed: Boolean
-  }]
+// Инициализация БД
+db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS users (
+    userId TEXT PRIMARY KEY,
+    name TEXT,
+    email TEXT UNIQUE,
+    password TEXT,
+    avatar TEXT
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS tasks (
+    taskId TEXT PRIMARY KEY,
+    userId TEXT,
+    title TEXT,
+    description TEXT,
+    dueDate TEXT,
+    priority TEXT CHECK(priority IN ('high', 'medium', 'low')),
+    completed INTEGER DEFAULT 0,
+    tags TEXT,
+    FOREIGN KEY(userId) REFERENCES users(userId)
+  )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS workspaces (
+    workspaceId TEXT PRIMARY KEY,
+    userId TEXT,
+    name TEXT,
+    FOREIGN KEY(userId) REFERENCES users(userId)
+  )`);
 });
 
-const User = mongoose.model('User', UserSchema);
-
-// Генерация 6-значного ID
-const generateUserId = () => Math.floor(100000 + Math.random() * 900000).toString();
+// Генерация JWT токена
+function generateToken(userId) {
+  return jwt.sign({ userId }, process.env.JWT_SECRET || 'secret123', { expiresIn: '24h' });
+}
 
 // Регистрация
 app.post('/api/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
     
-    // Валидация
-    if (!name || !email || !password) {
-      return res.status(400).json({ 
-        error: 'All fields are required',
-        fields: { name: !name, email: !email, password: !password }
+    // Проверка существования пользователя
+    const userExists = await new Promise((resolve) => {
+      db.get("SELECT email FROM users WHERE email = ?", [email], (err, row) => {
+        if (err) throw err;
+        resolve(!!row);
       });
-    }
+    });
 
-    if (await User.findOne({ email })) {
-      return res.status(400).json({ 
-        error: 'Email already exists',
-        field: 'email'
-      });
+    if (userExists) {
+      return res.status(400).json({ success: false, error: 'Email already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = generateUserId();
+    const userId = uuidv4();
+    const avatar = name.charAt(0).toUpperCase();
 
-    const user = new User({
-      userId,
-      name,
-      email,
-      password: hashedPassword,
-      tasks: []
+    await new Promise((resolve, reject) => {
+      db.run(
+        "INSERT INTO users (userId, name, email, password, avatar) VALUES (?, ?, ?, ?, ?)",
+        [userId, name, email, hashedPassword, avatar],
+        (err) => err ? reject(err) : resolve()
+      );
     });
 
-    await user.save();
+    const token = generateToken(userId);
 
-    const token = jwt.sign({ userId }, process.env.JWT_SECRET || 'secret123', { expiresIn: '24h' });
-
-    res.status(201).json({
+    res.json({
       success: true,
       token,
       userId,
-      name
+      name,
+      avatar
     });
 
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ 
-      error: 'Registration failed',
-      details: error.message 
-    });
+    res.status(500).json({ success: false, error: 'Registration failed' });
   }
 });
 
@@ -95,109 +100,84 @@ app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Валидация
-    if (!email || !password) {
-      return res.status(400).json({ 
-        error: 'Email and password are required',
-        fields: { email: !email, password: !password }
+    const user = await new Promise((resolve) => {
+      db.get("SELECT * FROM users WHERE email = ?", [email], (err, row) => {
+        if (err) throw err;
+        resolve(row);
       });
-    }
-
-    const user = await User.findOne({ email });
+    });
 
     if (!user) {
-      return res.status(401).json({ 
-        error: 'Invalid credentials',
-        field: 'email'
-      });
+      return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ 
-        error: 'Invalid credentials',
-        field: 'password'
-      });
+      return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.userId }, process.env.JWT_SECRET || 'secret123', { expiresIn: '24h' });
+    const token = generateToken(user.userId);
 
     res.json({
       success: true,
       token,
       userId: user.userId,
-      name: user.name
+      name: user.name,
+      avatar: user.avatar
     });
 
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ 
-      error: 'Login failed',
-      details: error.message 
-    });
+    res.status(500).json({ success: false, error: 'Login failed' });
   }
 });
 
 // Middleware для проверки авторизации
-const authMiddleware = async (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-      return res.status(401).json({ error: 'No token provided' });
-    }
+function authenticate(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ success: false, error: 'Unauthorized' });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
+  jwt.verify(token, process.env.JWT_SECRET || 'secret123', (err, decoded) => {
+    if (err) return res.status(401).json({ success: false, error: 'Invalid token' });
     req.userId = decoded.userId;
     next();
-  } catch (error) {
-    console.error('Auth error:', error);
-    res.status(401).json({ error: 'Invalid token' });
-  }
-};
+  });
+}
 
-// Получение задач (только для авторизованных)
-app.get('/api/tasks', authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findOne({ userId: req.userId });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+// Получение задач пользователя
+app.get('/api/tasks', authenticate, (req, res) => {
+  db.all(
+    "SELECT * FROM tasks WHERE userId = ? ORDER BY dueDate",
+    [req.userId],
+    (err, tasks) => {
+      if (err) {
+        console.error('Tasks error:', err);
+        return res.status(500).json({ success: false, error: 'Failed to get tasks' });
+      }
+      res.json({ success: true, tasks });
     }
-
-    res.json({
-      success: true,
-      tasks: user.tasks
-    });
-
-  } catch (error) {
-    console.error('Tasks error:', error);
-    res.status(500).json({ 
-      error: 'Failed to get tasks',
-      details: error.message 
-    });
-  }
+  );
 });
 
-// Проверка авторизации
-app.get('/api/check-auth', authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findOne({ userId: req.userId });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+// Создание задачи
+app.post('/api/tasks', authenticate, (req, res) => {
+  const { title, description, dueDate, priority, tags } = req.body;
+  const taskId = uuidv4();
 
-    res.json({
-      success: true,
-      userId: user.userId,
-      name: user.name
-    });
-  } catch (error) {
-    console.error('Check auth error:', error);
-    res.status(500).json({ 
-      error: 'Auth check failed',
-      details: error.message 
-    });
-  }
+  db.run(
+    "INSERT INTO tasks (taskId, userId, title, description, dueDate, priority, tags) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [taskId, req.userId, title, description, dueDate, priority, JSON.stringify(tags)],
+    function(err) {
+      if (err) {
+        console.error('Create task error:', err);
+        return res.status(500).json({ success: false, error: 'Failed to create task' });
+      }
+      res.json({ success: true, taskId });
+    }
+  );
 });
+
+// Остальные API endpoints (редактирование, удаление задач и т.д.)...
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
