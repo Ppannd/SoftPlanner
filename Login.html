@@ -280,7 +280,7 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+         document.querySelector('form').addEventListener('submit', async (e) => {
   e.preventDefault();
   
   const email = document.getElementById('email').value;
@@ -295,19 +295,16 @@
 
     const data = await response.json();
 
-    if (!data.success) {
-      throw new Error(data.error || 'Login failed');
+    if (data.error) {
+      throw new Error(data.error);
     }
 
-    // Сохранение данных
     localStorage.setItem('token', data.token);
     localStorage.setItem('userId', data.userId);
     localStorage.setItem('userName', data.name);
     localStorage.setItem('userAvatar', data.avatar);
 
-    // Перенаправление
     window.location.href = 'home.html';
-
   } catch (error) {
     console.error('Login error:', error);
     alert(error.message);
