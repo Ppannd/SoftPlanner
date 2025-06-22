@@ -310,8 +310,7 @@
         </div>
     </div>
 
-    <script>
-        // Обработка регистрации
+   <script>
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -319,65 +318,38 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('password-again').value;
-            
-            // Валидация
+
             if (password !== confirmPassword) {
-                alert('Passwords do not match!');
+                alert('Пароли не совпадают!');
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name,
-                        email,
-                        password
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
                 });
-                
+
                 const data = await response.json();
-                
-                if (response.ok) {
-                    alert('Registration successful! Please login.');
-                    window.location.href = 'Login.html';
-                } else {
-                    alert(data.error || 'Registration failed');
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Ошибка регистрации');
                 }
+
+                // Сохраняем данные
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userId', data.userId);
+                localStorage.setItem('userName', data.name);
+
+                // Перенаправляем без задержки
+                window.location.href = 'home.html';
+
             } catch (error) {
-                console.error('Registration error:', error);
-                alert('Registration failed. Please try again.');
+                console.error('Ошибка:', error);
+                alert(error.message);
             }
         });
-
-        // Создание анимированных пузырьков
-        function createBubbles() {
-            const bubblesContainer = document.getElementById('bubbles');
-            const bubbleCount = 12;
-            
-            for (let i = 0; i < bubbleCount; i++) {
-                const bubble = document.createElement('div');
-                bubble.classList.add('bubble');
-                
-                const size = Math.random() * 50 + 40;
-                const posX = Math.random() * 100;
-                const duration = Math.random() * 10 + 15;
-                const delay = Math.random() * 15;
-                
-                bubble.style.width = `${size}px`;
-                bubble.style.height = `${size}px`;
-                bubble.style.left = `${posX}%`;
-                bubble.style.animationDuration = `${duration}s`;
-                bubble.style.animationDelay = `${delay}s`;
-                
-                bubblesContainer.appendChild(bubble);
-            }
-        }
-        
-        window.addEventListener('load', createBubbles);
     </script>
 </body>
 </html>
