@@ -19,44 +19,6 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Анимация пузырьков */
-        .background-bubbles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-        
-        .bubble {
-            position: absolute;
-            border-radius: 40%;
-            background: radial-gradient(circle, rgba(134,53,255,0.15) 0%, rgba(166,88,199,0.1) 70%, transparent 100%);
-            filter: blur(2px);
-            animation: float-up linear infinite;
-        }
-        
-        @keyframes float-up {
-            0% {
-                transform: translateY(100vh) scale(0.5);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.3;
-            }
-            90% {
-                opacity: 0.3;
-            }
-            100% {
-                transform: translateY(-100px) scale(1.2);
-                opacity: 0;
-            }
         }
 
         .container {
@@ -140,7 +102,6 @@
             width: 100%;
             padding: 14px;
             background-color: #7982F6;
-            color: white;
             border: none;
             border-radius: 5px;
             font-size: 16px;
@@ -149,19 +110,11 @@
             transition: all 0.3s;
             margin-top: 10px;
             position: relative;
-            color: transparent;
+            overflow: hidden;
         }
-        .submit-btn::after {
-            content: "CONTINUE";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(to right, #5AFF8C, #45DDEE); 
+        
+        .btn-text {
+            background: linear-gradient(to right, #5AFF8C, #45DDEE);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -195,85 +148,61 @@
         .login-link a:hover {
             text-decoration: underline;
         }
+        
         .logo {
-            position: relative;
-            text-align: center;
-            padding-right: 0px;
+    text-align: left;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.logo h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 35px;
+    color: #7881F6;
+    margin-bottom: 1px;
+    font-weight: bold;
+}
+
+.logo-icon {
+    display: inline-flex;
+    align-items: center;
+}
+
+.logo-icon svg {
+    width: 40px;
+    height: 40px;
+    color: #7982F6;
+    display: block;
+}
+
+.logo p {
+    color: #8D9BB1;
+    font-size: 15px;
+    text-align: left;
+}
+        
+        .error-message {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 5px;
         }
-
-        .logo-icon {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-        }   
-        .logo h1 {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            font-size: 35px;
-            color: #7881F6;
-            margin-bottom: 1px;
-            font-weight: bold;
-        }
-
-        .logo-icon {
-            display: inline-flex;
-            margin-left: -20px;
-            transform: translateY(-25px);
-        }
-
-        .logo-icon svg {
-            width: 40px;
-            height: 40px;
-            color: #7982F6;
-            display: block;
-        }
-
-
-        .submit-btn-link {
-        display: inline-block;
-        width: 100%;
-        padding: 14px;
-        background-color: #7982F6;
-        border-radius: 5px;
-        text-align: center;
-        text-decoration: none;
-        transition: all 0.3s;
-        margin-top: 10px;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .submit-btn-link:hover {
-        background-color: #3a7bc8;
-    }
-    
-    .btn-text {
-        background: linear-gradient(to right, #5AFF8C, #45DDEE);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        font-size: 16px;
-        font-weight: bold;
-    }
     </style>
 </head>
 <body>
-    <!-- Контейнер для анимированных пузырьков -->
-    <div class="background-bubbles" id="bubbles"></div>
-    
     <div class="container">
         <div class="logo">
-            <h1>Soft Planner
-                <div class="logo-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                </div>
-            </h1>
-            <p>Increase your productivity</p>
+    <h1>
+        <span>Soft Planner</span>
+        <div class="logo-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
         </div>
+    </h1>
+    <p>Increase your productivity</p>
+</div>
         
         <h2 class="form-title">Create your account</h2>
         <div class="divider"></div>
@@ -281,28 +210,30 @@
         <form id="registerForm">
             <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" placeholder="Any" required>
+                <input type="text" id="name" placeholder="Your name" required>
+                <div id="name-error" class="error-message"></div>
             </div>
             
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" placeholder="your@email.ru" required>
+                <input type="email" id="email" placeholder="your@email.com" required>
+                <div id="email-error" class="error-message"></div>
             </div>
             
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" placeholder="*********" minlength="8" required>
                 <p class="password-hint">min 8 characters</p>
+                <div id="password-error" class="error-message"></div>
             </div>
             
             <div class="form-group">
                 <label for="password-again">Confirm Password</label>
-                <input type="password" id="password-again" placeholder="*********" minlength="8" required>
+                <input type="password" id="password-again" placeholder="*********" required>
+                <div id="password-again-error" class="error-message"></div>
             </div>
 
-            <button type="submit" class="submit-btn-link">
-                <span class="btn-text">CONTINUE</span>
-            </button>
+            <button type="submit" class="submit-btn"><span class="btn-text">CONTINUE</span></button>
         </form>
         
         <div class="login-link">
@@ -310,44 +241,50 @@
         </div>
     </div>
 
-   <script>
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const confirmPassword = document.getElementById('password-again').value;
-
-  if (password !== confirmPassword) {
-    alert('Passwords do not match!');
-    return;
-  }
-
-  try {
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('userId', data.userId);
-    localStorage.setItem('userName', data.name);
-    localStorage.setItem('userAvatar', data.avatar);
-
-    window.location.href = 'home.html';
-  } catch (error) {
-    console.error('Registration error:', error);
-    alert(error.message);
-  }
-});
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Очистка предыдущих ошибок
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const passwordAgain = document.getElementById('password-again').value;
+            
+            let isValid = true;
+            
+            // Простая валидация
+            if (name.length < 2) {
+                document.getElementById('name-error').textContent = 'Name must be at least 2 characters';
+                isValid = false;
+            }
+            
+            if (!email.includes('@') || !email.includes('.')) {
+                document.getElementById('email-error').textContent = 'Please enter a valid email';
+                isValid = false;
+            }
+            
+            if (password.length < 8) {
+                document.getElementById('password-error').textContent = 'Password must be at least 8 characters';
+                isValid = false;
+            }
+            
+            if (password !== passwordAgain) {
+                document.getElementById('password-again-error').textContent = 'Passwords do not match';
+                isValid = false;
+            }
+            
+            if (isValid) {
+                // Сохраняем данные в localStorage
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userPassword', password);
+                
+                // Перенаправляем на страницу входа
+                window.location.href = 'Login.html';
+            }
+        });
     </script>
 </body>
 </html>
